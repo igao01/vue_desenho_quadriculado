@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+	<title>Vue</title>
+</head>
+
+<body>
+	<div id="app">
+
+		<div
+			style="float: left; align-items: left; padding: 10px; box-shadow: #ccc 0px 0px 3px 1px; background-color: rgb(255, 255, 255); margin-right: 2px;">
+			<label :style="campo" for="largura">Largura</label>
+			<br>
+			<input :style="campo" type="text" name="largura" size="2" maxlength="2" v-model.number.lazy="largura">
+
+			<br><br>
+
+			<label :style="campo" for="comprimento">Comprimento</label>
+			<br>
+			<input :style="campo" type="text" name="comprimento" size="2" maxlength="2"
+				v-model.number.lazy="comprimento">
+
+			<br><br>
+
+			<button :style="botao" name="pincel" @click="pegarPincel">Pincel</button>
+			<br>
+			<div
+				:style="{backgroundColor: cor, padding: '20px', maxWidth: '80px', maxHeight: '20px', marginTop: '5px', border: '1px solid'}">
+			</div>
+			<br><br>
+			<button :style="botao" name="borracha" @click="apagar">Borracha</button><br>
+
+			<!--<button :style="botao" name="limpar" @click="limpar">Limpar</button>-->
+		</div>
+
+		<!-- CORES PREDEFINIDAS-->
+		<div style="float: left;">
+			<div style="display: flex;">
+
+				<span v-for="(corPredefinida, key) in coresPredefinidas" :id="key">
+					<button
+						:style="{backgroundColor: corPredefinida, padding: '5px', color: '#ffffff', fontSize: '18px', width: '80px'}"
+						@click="cor = corPredefinida">{{
+						key
+						}}</button></span>
+				<span style="padding-right: 10px;"></span>
+
+
+				<!-- PALETA DE CORES -->
+				<div id="paleta">
+					<table>
+						<tr>
+							<td v-for="(item, key) in paleta" :style="{backgroundColor: item}"
+								:id="key + item" @click="cor = item">
+							</td>
+						</tr>
+					</table>
+				</div>
+				<span style="padding-right: 10px;"></span>
+
+				<!-- INPUT COR PERSONALIZADA -->
+				<input type="color" name="cor" v-model="cor" style="height: 30px;">
+				<span style="padding-right: 80px;"></span>
+			</div>
+
+			<!-- QUADRICULADO -->
+			<table id="tbquadriculado">
+				<tr v-for="a in comprimento">
+
+					<td v-for="b in largura" @mousedown="start" @mouseup="stop" @touchstart="start"
+						@touchend="start" @touchcancel="start" @mouseover="pintar" @click="pintarClicando"
+						:id="a.toString() + b.toString()">
+					</td>
+
+				</tr>
+			</table>
+		</div>
+		<!-- CORES UTILIZADAS -->
+		<div style="float: left;">
+			<span>Histórico</span>
+			<div>
+				<span v-for="(item, key) in coresUtilizadas" :id="key">
+					<button :style="{backgroundColor: item}" @click="cor = item" class="cores-utilizadas">{{
+						item }}</button>
+					<br></span>
+				<span style="padding-right: 10px;"></span>
+			</div>
+		</div>
+	</div>
+	<script>
+		const vm = new Vue({
+			el: '#app',
+			data: {
+				largura: 10,
+				comprimento: 10,
+				cor: "#FFFFFF",
+				hold: false,
+				borracha: false,
+				ultimaCor: "",
+				coresUtilizadas: [],
+				coresPredefinidas: {
+					pedra: "#7A7A7A",
+					madeira: "#91674E",
+					porta: "#CB1010",
+				},
+				paleta: {
+					preto: "#000000",
+					marrom: "#8B4513",
+					roxo: "#4B0082",
+					azul: "#0000CD",
+					verde: "#008000",
+					roxoClaro: "#A020F0",
+					laranja: "#FF4500",
+					azulClaro: "#00BFFF",
+					rosa: "#FF1493",
+					rosaClaro: "#FF69B4",
+					verdeClaro: "#00FF00",
+					amarelo: "#FFFF00"
+				},
+				campo: {
+					paddingLeft: "0px",
+					maxHeight: "40px"
+				},
+				botao: {
+					width: "120px",
+					marginLeft: "0px",
+					marginTop: "5px",
+					maxHeight: "40px",
+					fontSize: "20px",
+				},
+			},
+			methods: {
+				pintar(event) {
+					if (this.hold) {
+						event.srcElement.bgColor = this.cor;
+						this.addCorUtilizada();
+					}
+				},
+				pintarClicando() {
+					event.srcElement.bgColor = this.cor;
+					this.addCorUtilizada();
+				},
+				start() {
+					this.pintarClicando();
+					this.hold = true;
+				},
+				stop() {
+					this.hold = false;
+				},
+				apagar() {
+					this.ultimaCor = this.cor;
+					this.cor = "#FFFFFF";
+					borracha = true;
+				},
+				pegarPincel() {
+					this.cor = this.ultimaCor;
+					borracha = false;
+				},
+				addCorUtilizada() {
+					let corEncontrada = this.coresUtilizadas.find(elemento => elemento === this.cor);
+
+					if (!corEncontrada && this.cor != "#FFFFFF") {
+						if (this.coresUtilizadas.length >= 5) {
+							//remove o primeiro elemento do array
+							this.coresUtilizadas.shift();
+						}
+						this.coresUtilizadas.push(this.cor);
+					}
+				},
+				/* limpar() {
+					document.getElementById("tbquadriculado").style.backgroundColor = "white";
+				}*/
+			},
+		});
+	</script>
+
+	<style>
+		body {
+			width: 100%;
+			margin: 0px auto;
+			font-size: 24px;
+			height: 100%;
+			background-color: rgb(247, 247, 247);
+		}
+
+		#app {
+			background-color: rgb(247, 247, 247);
+			height: 100%;
+			min-height: 1200px;
+			padding: 10px;
+		}
+
+		td {
+			padding: 16px;
+			border: 1px rgb(105, 105, 105) solid;
+		}
+
+		ul {
+			display: flex;
+		}
+
+		table {
+			background-color: #FFFFFF;
+			height: 100%;
+		}
+
+		input {
+			font-size: 20px;
+		}
+
+		.cores-utilizadas {
+			color: #ffffff;
+			padding: 10px 50px;
+			width: 100%;
+			max-width: 250px;
+			max-height: 60px;
+		}
+	</style>
+</body>
+
+</html>
